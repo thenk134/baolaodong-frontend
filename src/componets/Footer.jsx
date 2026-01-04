@@ -41,8 +41,8 @@ export default function Footer(){
 
         {/* Dòng bản quyền dưới cùng */}
         <div className="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">
-          <p>© 2026 Dự án Đồ án Nhóm 17 - LTFE. Thiết kế bởi Thành.</p>
-          <p className="mt-1 italic">Mọi hành động sao chép nội dung vui lòng ghi rõ nguồn.</p>
+          <p>© 2026 Dự án Đồ án Nhóm 17 - LTFE. Thiết kế bởi CyanTakeOff.</p>
+          {/* <p className="mt-1 italic">Mọi hành động sao chép nội dung vui lòng ghi rõ nguồn.</p> */}
         </div>
       </div>
     </footer>
