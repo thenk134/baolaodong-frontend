@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import NewsDetail from "./pages/NewsDetail";
+import Category from "./pages/Category";
 
 function App() {
   return (
@@ -14,6 +15,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/news/:id" element={<NewsDetail />} />
+
+          {/* slug - viec lam  */}
+          <Route path="/category/:slug" element ={<Category/>} />
+
+        
         </Routes>
       </main>
 

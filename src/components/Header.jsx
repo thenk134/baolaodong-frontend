@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 
 export default function Header() {
   return (
@@ -32,15 +34,15 @@ export default function Header() {
       {/* 2. Navigation Menu: Các chuyên mục */}
       <nav className="bg-red-700">
         <div className="container mx-auto px-4">
-          <ul className="flex items-center space-x-6 overflow-x-auto no-scrollbar py-2.5 text-white text-sm font-bold uppercase whitespace-nowrap">
-            <li className="hover:text-yellow-300 cursor-pointer transition">Trang chủ</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Thời sự</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Việc làm</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Pháp luật</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Bảo hiểm</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Công đoàn</li>
-            <li className="hover:text-yellow-300 cursor-pointer transition">Sức khỏe</li>
-          </ul>
+        <ul className="flex items-center space-x-6 overflow-x-auto no-scrollbar py-2.5 text-white text-sm font-bold uppercase whitespace-nowrap">
+          <li><Link to="/" className="hover:text-yellow-400 transition">Trang chủ</Link></li>
+          <li><Link to="/category/thoi-su" className="hover:text-yellow-400 transition">Thời sự</Link></li>
+          <li><Link to="/category/viec-lam" className="hover:text-yellow-400 transition">Việc làm</Link></li>
+          <li><Link to="/category/phap-luat" className="hover:text-yellow-400 transition">Pháp luật</Link></li>
+          <li><Link to="/category/bao-hiem" className="hover:text-yellow-400 transition">Bảo hiểm</Link></li>
+          <li><Link to="/category/cong-doan" className="hover:text-yellow-400 transition">Công đoàn</Link></li>
+          <li><Link to="/category/suc-khoe" className="hover:text-yellow-400 transition">Sức khỏe</Link></li>
+        </ul>
         </div>
       </nav>
     </header>
