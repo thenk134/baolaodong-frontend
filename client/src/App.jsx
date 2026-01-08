@@ -24,7 +24,7 @@ function App() {
           <Route path="/" element={<Home />} />
 
           {/* Trang chi tiết bài viết */}
-          <Route path="/news/:id" element={<NewsDetail />} />
+          <Route path="/news-detail" element={<NewsDetail />} />
 
           {/* Trang chuyên mục (slug: thoi-su, viec-lam...) */}
           <Route path="/category/:slug" element={<Category />} />

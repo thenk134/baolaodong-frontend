@@ -1,49 +1,116 @@
 import express from 'express';
 import RSSParser from 'rss-parser';
 import cors from 'cors';
-import axios from 'axios'; // Thêm axios
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
 const app = express();
-const parser = new RSSParser();
-
 app.use(cors());
 
-app.get('/api/news', async (req, res) => {
+const parser = new RSSParser();
+
+// LẤY TIN TRANG CHỦ TỪ BÁO TUỔI TRẺ (Thay cho Lao Động bị lỗi)
+app.get('/api/news/home-laodong', async (req, res) => {
   try {
-    const RSS_URL = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
-    // const RSS_URL = 'https://laodong.vn/rss/home.rss';
+    // Chúng ta giữ nguyên tên Route /home-laodong để bạn không phải sửa Frontend
+    const RSS_URL = 'https://tuoitre.vn/rss/tin-moi-nhat.rss';
     
-    // Sử dụng axios để lấy dữ liệu thô với Header giả lập trình duyệt
     const response = await axios.get(RSS_URL, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
-      }
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
-    // Ép kiểu parser đọc từ chuỗi dữ liệu vừa tải về
     const feed = await parser.parseString(response.data);
-    
     const articles = feed.items.map(item => {
-      const content = item.content || item.description || "";
-      const imgRegex = /<img[^>]+src="([^">]+)"/;
-      const match = content.match(imgRegex);
-      
+      // Tách ảnh từ description của Tuổi Trẻ
+      const match = (item.content || item.description || "").match(/src="([^">]+)"/);
       return {
         id: item.guid || item.link,
         title: item.title,
         description: item.contentSnippet || "Nhấp để xem chi tiết...",
         link: item.link,
         date: item.pubDate,
-        image: match ? match[1] : "https://via.placeholder.com/400x250" 
+        image: match ? match[1] : "https://via.placeholder.com/400x250"
       };
     });
 
     res.json(articles);
   } catch (error) {
-    console.error("Lỗi Server:", error.message);
-    res.status(500).json({ error: "Không thể nhận diện định dạng RSS từ Lao Động" });
+    console.error("LỖI TUỔI TRẺ:", error.message);
+    res.json([]);
   }
 });
 
-app.listen(5000, () => console.log('Backend đang chạy tại http://localhost:5000'));
+// API CHUYÊN MỤC
+app.get('/api/news/:source/:category', async (req, res) => {
+  try {
+    const { source, category } = req.params;
+    let url = '';
+    
+    if (source === 'tuoitre') {
+      url = `https://tuoitre.vn/rss/${category}.rss`;
+    } else if (source === 'nld') {
+      url = `https://nld.com.vn/${category}.rss`;
+    } else {
+      url = `https://vnexpress.net/rss/${category}.rss`;
+    }
+
+    const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const feed = await parser.parseString(response.data);
+    
+    const articles = feed.items.map(item => {
+      const match = (item.content || item.description || "").match(/src="([^">]+)"/);
+      return {
+        id: item.link,
+        title: item.title,
+        description: item.contentSnippet,
+        link: item.link,
+        date: item.pubDate,
+        image: match ? match[1] : "https://via.placeholder.com/400x250"
+      };
+    });
+    res.json(articles);
+  } catch (error) {
+    res.json([]);
+  }
+});
+
+// API CHI TIẾT (Đã thêm bộ bóc tách cho Tuổi Trẻ)
+app.get('/api/news-detail', async (req, res) => {
+  try {
+    const { url } = req.query;
+    const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const $ = cheerio.load(response.data);
+    let title = '', description = '', content = '', selector = '';
+
+    if (url.includes('tuoitre.vn')) {
+      title = $('.article-title').text().trim();
+      description = $('.sapo').text().trim();
+      selector = '#main-detail-body'; // Selector nội dung của Tuổi Trẻ
+    } else if (url.includes('nld.com.vn')) {
+      title = $('.title-content').text();
+      description = $('.sapo-detail').text();
+      selector = '.content-news-detail';
+    } else {
+      title = $('h1.title-detail').text();
+      description = $('p.description').text();
+      selector = 'article.fck_detail';
+    }
+
+    $(selector).find('p, img').each((i, el) => {
+      if (el.name === 'p') {
+        content += `<p class="mb-4 text-lg text-gray-800">${$(el).html()}</p>`;
+      } else if (el.name === 'img') {
+        let src = $(el).attr('data-src') || $(el).attr('src');
+        if (src) {
+          if (src.startsWith('//')) src = 'https:' + src;
+          content += `<img src="${src}" class="w-full rounded my-4" />`;
+        }
+      }
+    });
+    res.json({ title, description, content });
+  } catch (error) {
+    res.status(500).json({ error: "Lỗi nội dung" });
+  }
+});
+
+app.listen(5000, () => console.log('Server đã đổi sang nguồn Tuổi Trẻ - Port 5000'));
