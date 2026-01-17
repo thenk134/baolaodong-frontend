@@ -20,13 +20,13 @@ export default function Header() {
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
         {/* Logo giữ nguyên */}
-        <div className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 cursor-pointer select-none">
           <div className="bg-red-700 text-white font-black px-3 py-1 rounded-sm text-2xl">NLĐ</div>
           <div className="leading-tight">
             <h1 className="text-xl font-extrabold text-red-700 tracking-tighter">NGƯỜI LAO ĐỘNG</h1>
             <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest">Tin tức & Việc làm</p>
           </div>
-        </div>
+        </Link>
 
         {/* CẬP NHẬT: Thay div bằng form để hỗ trợ nhấn phím Enter */}
         <form 

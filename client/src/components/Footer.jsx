@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, useNavigate } from 'react-router-dom';
 export default function Footer(){
     return (
        <footer className="bg-gray-900 text-gray-300 pt-10 pb-6 border-t-4 border-red-700">
@@ -20,10 +21,10 @@ export default function Footer(){
           <div>
             <h3 className="text-white font-semibold mb-4">Chuyên mục</h3>
             <ul className="text-sm space-y-2">
-              <li className="hover:text-red-500 cursor-pointer">➜ Tin tức thời sự</li>
-              <li className="hover:text-red-500 cursor-pointer">➜ Tư vấn pháp luật</li>
-              <li className="hover:text-red-500 cursor-pointer">➜ Tuyển dụng việc làm</li>
-              <li className="hover:text-red-500 cursor-pointer">➜ Bảo hiểm xã hội</li>
+              <li><Link to="/category/thoi-su" className="hover:text-red-500 cursor-pointer">➜ Tin tức thời sự</Link></li>
+              <li><Link to="/category/viec-lam" className="hover:text-red-500 cursor-pointer">➜ Tuyển dụng việc làm</Link></li>
+              <li><Link to="/category/phap-luat" className="hover:text-red-500 cursor-pointer">➜ Tư vấn pháp luật</Link></li>
+              <li><Link to="/category/bao-hiem" className="hover:text-red-500 cursor-pointer">➜ Bảo hiểm xã hội</Link></li>
             </ul>
           </div>
 
