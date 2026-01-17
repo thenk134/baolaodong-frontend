@@ -7,6 +7,7 @@ import NewsDetail from "./pages/NewsDetail";
 import Category from "./pages/Category";
 import ScrollToTop from "./components/ScrollToTop";
 import Search from "./pages/Search";
+import Bookmarks from "./pages/Bookmarks";
 
 function App() {
   return (
@@ -31,6 +32,9 @@ function App() {
 
           {/* Trang tìm kiếm */}
           <Route path="/search" element={<Search />} />
+
+          {/*Trang mục đã lưu*/}
+          <Route path="/bookmarks" element={<Bookmarks/>}/>
         </Routes>
       </main>
 
