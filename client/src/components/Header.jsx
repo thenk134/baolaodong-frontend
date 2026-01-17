@@ -57,6 +57,7 @@ export default function Header() {
             <li><Link to="/category/bao-hiem" className="hover:text-yellow-400 transition">Bảo hiểm</Link></li>
             <li><Link to="/category/cong-doan" className="hover:text-yellow-400 transition">Công đoàn</Link></li>
             <li><Link to="/category/suc-khoe" className="hover:text-yellow-400 transition">Sức khỏe</Link></li>
+            <li><Link to="/bookmarks" className="hover:text-yellow-400 transition">📌 TIN ĐÃ LƯU</Link></li>
           </ul>
         </div>
       </nav>

@@ -1,9 +1,45 @@
 import React from "react";
+import { useEffect } from "react";
+import { useState } from "react";
+
 import { Link } from "react-router-dom";
 
 export default function NewsCard({ news }) {
+
+  //Kiem tra bài đã lưu chưa(isSaved)
+  const [isSaved, setIsSaved] = useState(false);
+
+  //Kiểm tra đã lưu vào localStorage hay chưa
+  useEffect(() => {
+    const saveList = JSON.parse(localStorage.getItem("saved_news")) || [];
+    //kieerm tra id 
+    const exists = saveList.some(item => item.link === news.link);
+    setIsSaved(exists);
+  }, [news.link]);
+
+  const handleBookmark = () => {
+    //lấy danh sách cũ ra, nếu đã lưu thì click = bỏ lưu và ngược lại
+    const savedList = JSON.parse(localStorage.getItem("saved_news")) || [];
+
+    if(isSaved) {
+      const newList = savedList.filter(item => item.link !== news.link);
+      localStorage.setItem("saved_news", JSON.stringify(newList));
+      setIsSaved(false);
+    }
+    else {
+      savedList.push(news);
+      localStorage.setItem("saved_news", JSON.stringify(savedList));
+      setIsSaved(true);
+    }
+  };
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
+    <div className="relative group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
+
+      <button onClick={handleBookmark} className={`absolute top-2 right-2 p-2 rounded-full shadow-md z-10 transition-colors ${
+          isSaved ? "bg-red-600 text-white" : "bg-white text-gray-400 hover:text-red-500"}`} 
+          title={isSaved? "Bỏ lưu" : "Lưu tin này"}>
+          📌
+      </button>
       <img 
         src={news.image} 
         alt={news.title} 
