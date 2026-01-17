@@ -3,16 +3,31 @@ import RSSParser from 'rss-parser';
 import cors from 'cors';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import NodeCache from 'node-cache';
 
 const app = express();
 app.use(cors());
 
 const parser = new RSSParser();
 
+//Cấu hình cache
+//thời gian tồn tại dữ liệu trước khi hủy stdTTL-300s
+//checkperiod: 60s
+const myCache = new NodeCache({stdTTL:300, checkperiod:60})
+
 // LẤY TIN TRANG CHỦ TỪ BÁO TUỔI TRẺ (Thay cho Lao Động bị lỗi)
 app.get('/api/news/home-laodong', async (req, res) => {
   try {
-    // Chúng ta giữ nguyên tên Route /home-laodong để bạn không phải sửa Frontend
+
+    const CACHE_KEY = 'home_news'; // thêm nhãn cho gói tin Home
+    //1. kiểm tra xem còn lưu cache cũ không, nếu không thì load mới
+    const cachedData = myCache.get(CACHE_KEY);
+    if(cachedData) {
+      console.log('Lấy từ cache');
+      return res.json(cachedData);
+    }
+    //2.load mới dữ liệu
+    // Giữ nguyên tên Route /home-laodong để không phải sửa Frontend
     const RSS_URL = 'https://tuoitre.vn/rss/tin-moi-nhat.rss';
     
     const response = await axios.get(RSS_URL, {
@@ -32,11 +47,13 @@ app.get('/api/news/home-laodong', async (req, res) => {
         image: match ? match[1] : "https://via.placeholder.com/400x250"
       };
     });
+    //3. Lưu vào cache giúp người dùng sau load nhanh hơn
+    myCache.set(CACHE_KEY,articles);
 
     res.json(articles);
   } catch (error) {
-    console.error("LỖI TUỔI TRẺ:", error.message);
-    res.json([]);
+    console.error("LỖI TUỔI TRẺ:", error);
+    res.status(500).json({message: ' Lỗi server'});
   }
 });
 
@@ -45,7 +62,20 @@ app.get('/api/news/:source/:category', async (req, res) => {
   try {
     const { source, category } = req.params;
     let RSS_URL = "";
+    // Tạo key cache duy nhất cho từng chuyên mục
+    // Ví dụ: category_tuoitre_the-thao
+    const CACHE_KEY = `category_${source}_${category}`;
 
+    //1. Kiểm tra cache
+    const cachedData = myCache.get(CACHE_KEY);
+
+    if(cachedData) {
+      console.log(`[Category: ${category}] Lấy từ cache`);
+      return  res.json(cachedData);
+    }
+
+    //2. Không có trong cache thì tải mới
+    
     if (source === 'tuoitre') {
       // Link: https://tuoitre.vn/rss/thoi-su.rss
       RSS_URL = `https://tuoitre.vn/rss/${category}.rss`;
@@ -63,17 +93,24 @@ app.get('/api/news/:source/:category', async (req, res) => {
     const feed = await parser.parseString(response.data);
     
     // Logic map dữ liệu... (giữ nguyên phần map của bạn)
-    res.json(feed.items.map(item => ({
+    const articles = feed.items.map(item => ({
       title: item.title,
       link: item.link,
       image: item.enclosure?.url || "https://via.placeholder.com/400x250",
       description: item.contentSnippet
-    })));
+    }));
+
+    //3. Lưu cache để tăng tốc load cho người sau
+
+    myCache.set(CACHE_KEY, articles)
+    res.json(articles);
 
   } catch (error) {
-    console.error("Lỗi 404:", error.message);
+    console.error("Lỗi Server:", error.message);
     res.json([]);
+
   }
+  
 });
 // API CHI TIẾT (Đã thêm bộ bóc tách cho Tuổi Trẻ)
 app.get('/api/news-detail', async (req, res) => {
@@ -81,6 +118,14 @@ app.get('/api/news-detail', async (req, res) => {
     const { url } = req.query;
     if (!url) return res.status(400).json({ error: "Thiếu URL" });
 
+    //Tạo Key cache là chính đường link bài viết
+    const CACHE_KEY = `detail_${url}`;
+    //1. Kieem tra cache
+    const cachedContent = myCache.get(CACHE_KEY);
+    if(cachedContent) {
+      return res.json(cachedContent);
+    }
+    //2. Load content mới
     const response = await axios.get(url, {
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -142,7 +187,9 @@ app.get('/api/news-detail', async (req, res) => {
       }
     });
 
-    res.json({ title, description, content });
+    const result = { title, description, content };
+    myCache.set(CACHE_KEY, result);
+    res.json(result);
   } catch (error) {
     console.error("LỖI BÓC TÁCH:", error.message);
     res.json({ title: "Lỗi tải bài viết", description: "", content: "Không thể lấy nội dung từ nguồn này." });
