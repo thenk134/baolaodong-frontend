@@ -32,6 +32,18 @@ export default function NewsCard({ news }) {
       setIsSaved(true);
     }
   };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month:'2-digit',
+      year: 'numeric'
+    });
+  };
   return (
     <div className="relative group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
 
@@ -46,13 +58,17 @@ export default function NewsCard({ news }) {
         className="w-full h-48 object-cover" 
       />
       <div className="p-5">
+        <div className="flex items-center text-xs text-gray-400 mb-2">
+           <span className="mr-1">🕒</span>
+           <span>{formatDate(news.date)}</span>
+        </div>
         <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2">
           {news.title}
         </h3>
         
-        {/* SỬA TẠI ĐÂY: Sử dụng /news-detail và tham số ?url= */}
+        {/*Sử dụng /news-detail và tham số ?url= */}
         <Link 
-          to={`/news-detail?url=${encodeURIComponent(news.link)}`} 
+          to={`/news-detail?url=${encodeURIComponent(news.link)}&date=${encodeURIComponent(news.date)}`} 
           className="text-red-700 font-bold flex items-center hover:text-red-800 transition-colors"
         >
           Xem chi tiết <span className="ml-2">→</span>

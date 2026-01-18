@@ -10,6 +10,7 @@ export default function NewsDetail() {
   const [loading, setLoading] = useState(true);
   
   const targetUrl = searchParams.get("url");
+  const articleDate = searchParams.get("date");
 
   useEffect(() => {
     if (!targetUrl) return;
@@ -26,7 +27,23 @@ export default function NewsDetail() {
         setLoading(false);
       });
   }, [targetUrl]);
-
+  //  format ngày- như NewsCard
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('vi-VN', {
+        weekday: 'long', // Hiện thứ
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric'
+      });
+    } catch (e) {
+      return dateString;
+    }
+  };
   // Hiển thị trạng thái loading đẹp hơn
   if (loading) {
     return (
@@ -51,10 +68,15 @@ export default function NewsDetail() {
 
   return (
     <main className="container mx-auto px-4 py-10 max-w-3xl bg-white mt-5 shadow-2xl rounded-xl border border-gray-100">
-      <Link to="/" className="text-blue-600 font-bold mb-8 inline-flex items-center hover:translate-x-[-4px] transition-transform">
-        <span className="mr-2">←</span> Quay lại
-      </Link>
-      
+      <div className="flex justify-between items-center mb-8 border-b pb-4 border-gray-100">
+        <Link to="/" className="text-blue-600 font-bold mb-8 inline-flex items-center hover:translate-x-[-4px] transition-transform">
+          <span className="mr-2">←</span> Quay lại
+        </Link>
+        <div className="bg-gray-100 px-3 py-1 rounded-full text-xs md:text-sm text-gray-500 font-medium flex items-center">
+              <span className="mr-2">📅</span>
+              {formatDate(articleDate)}
+        </div>
+      </div>
       <header className="mb-8">
         <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 leading-tight">
           {article.title}
